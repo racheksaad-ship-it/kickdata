@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>KickData — Statistiques Football IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+[data-theme="dark"]{
+  --bg:#080f1e;--bg2:#0c1628;--bg3:#111f3a;--bg4:#182848;
+  --blue:#1a5fd4;--blue2:#2272f5;--sky:#5ba4f5;--skylight:#a8cff9;
+  --text:#e8f0fe;--text2:#94b3d8;--text3:#5a7fa8;
+  --border:rgba(90,160,240,0.12);--border2:rgba(90,160,240,0.25);
+  --card:#0f1e38;--shadow:rgba(0,0,0,0.4);
+}
+[data-theme="light"]{
+  --bg:#f0f5ff;--bg2:#ffffff;--bg3:#e4edfb;--bg4:#d0e0f8;
+  --blue:#1a5fd4;--blue2:#2272f5;--sky:#2272f5;--skylight:#1a5fd4;
+  --text:#0d1f3c;--text2:#3a5a8a;--text3:#7a9cc8;
+  --border:rgba(30,80,180,0.12);--border2:rgba(30,80,180,0.25);
+  --card:#ffffff;--shadow:rgba(20,60,160,0.1);
+}
+
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+/* ── LANDING ── */
+#landing{min-height:100vh;display:flex;flex-direction:column;animation:fadeIn .6s ease}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:60px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:36px;height:36px;border-radius:10px;background:var(--blue2);display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:20px;height:20px}
+.logo-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--text)}
+.logo-name span{color:var(--sky)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.theme-btn{width:36px;height:36px;border-radius:9px;border:1px solid var(--border2);background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:16px;transition:all .2s}
+.theme-btn:hover{background:var(--bg4);color:var(--text)}
+.cta-nav{padding:8px 18px;border-radius:9px;background:var(--blue2);color:#fff;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s}
+.cta-nav:hover{background:var(--sky);transform:translateY(-1px)}
+.lang-select-wrap select{background:var(--bg3);border:1px solid var(--border2);border-radius:9px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;padding:6px 10px;cursor:pointer;outline:none;transition:border-color .2s;appearance:none}
+.lang-select-wrap select:hover{border-color:var(--sky)}
+.lang-select-wrap select option{background:var(--bg2);color:var(--text)}
+
+.hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem 1.5rem 3rem;text-align:center;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(34,114,245,0.08) 0%,transparent 70%)}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(2.2rem,6vw,3.8rem);font-weight:800;line-height:1.1;margin-bottom:1.25rem;animation:slideUp .5s .2s both}
+.hero h1 em{font-style:normal;color:var(--sky)}
+.hero p{font-size:clamp(14px,2vw,16px);color:var(--text2);max-width:520px;line-height:1.75;margin-bottom:2.5rem;animation:slideUp .5s .3s both}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;animation:slideUp .5s .4s both}
+.btn-primary{padding:13px 28px;border-radius:11px;background:var(--blue2);color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;display:flex;align-items:center;gap:8px}
+.btn-primary:hover{background:var(--sky);transform:translateY(-2px);box-shadow:0 8px 24px rgba(34,114,245,0.35)}
+.hero-visual{margin:3rem 0 2rem;animation:slideUp .5s .5s both}
+.chart-demo{width:min(420px,90vw);height:120px}
+.chart-demo svg{width:100%;height:100%}
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;max-width:860px;width:100%;margin:0 auto;padding:0 1.5rem 4rem;animation:slideUp .5s .6s both}
+.feat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.25rem;transition:border-color .2s}
+.feat:hover{border-color:var(--border2)}
+.feat-icon{font-size:22px;margin-bottom:8px}
+.feat h3{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+.feat p{font-size:12px;color:var(--text2);line-height:1.55}
+.sources-strip{background:var(--bg2);border-top:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:center;gap:1.5rem;flex-wrap:wrap}
+.src-name{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.5px}
+
+/* ── APP SHELL ── */
+#app{display:none;height:100vh;flex-direction:column}
+#app.active{display:flex}
+.app-nav{display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;height:52px;flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--border)}
+.app-nav-left{display:flex;align-items:center;gap:10px}
+.back-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:14px;transition:all .15s}
+.back-btn:hover{background:var(--bg4);color:var(--text)}
+.app-logo-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text)}
+.app-logo-name span{color:var(--sky)}
+.app-nav-right{display:flex;align-items:center;gap:8px}
+.live-pill{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px 9px}
+.live-dot{width:5px;height:5px;border-radius:50%;background:#4ade80;animation:glow 2s infinite}
+@keyframes glow{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── TABS ── */
+.app-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;padding:0 1.25rem}
+.tab-btn{padding:10px 18px;font-size:13px;font-weight:500;color:var(--text3);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;display:flex;align-items:center;gap:6px}
+.tab-btn:hover{color:var(--text2)}
+.tab-btn.active{color:var(--sky);border-bottom-color:var(--sky)}
+
+/* ── APP LAYOUT ── */
+.app-layout{display:flex;flex:1;min-height:0;overflow:hidden}
+.sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.sidebar.hidden{display:none}
+.sb-head{padding:.9rem 1rem .7rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sb-head-title{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-weight:500}
+.sb-close{width:22px;height:22px;border-radius:6px;border:none;background:var(--bg3);cursor:pointer;color:var(--text2);font-size:13px;display:flex;align-items:center;justify-content:center}
+.sb-scroll{flex:1;overflow-y:auto;padding:.7rem}
+.sb-section-title{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin:10px 0 6px;font-weight:500}
+.sb-btn{display:block;width:100%;text-align:left;background:transparent;border:1px solid var(--border);border-radius:8px;padding:7px 9px;color:var(--text2);font-family:'Inter',sans-serif;font-size:11.5px;cursor:pointer;margin-bottom:5px;line-height:1.4;transition:all .15s}
+.sb-btn:hover{background:var(--bg3);border-color:var(--border2);color:var(--text)}
+.hist-item{display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .15s;border:1px solid transparent;margin-bottom:4px}
+.hist-item:hover{background:var(--bg3);border-color:var(--border)}
+.hist-q{font-size:12px;color:var(--text);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.hist-time{font-size:10px;color:var(--text3)}
+.hist-clear-btn{width:100%;margin-top:8px;padding:5px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:10px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;text-align:center}
+.hist-clear-btn:hover{background:rgba(226,75,74,0.1);border-color:rgba(226,75,74,0.3);color:#f09595}
+
+/* ── TAB PANELS ── */
+.tab-panel{display:none;flex:1;flex-direction:column;min-height:0;overflow:hidden}
+.tab-panel.active{display:flex}
+
+/* ── CHAT ── */
+.chat-main{flex:1;display:flex;flex-direction:column;min-width:0}
+.chat-messages{flex:1;overflow-y:auto;padding:1.25rem;display:flex;flex-direction:column;gap:18px}
+.welcome{text-align:center;padding:2rem .5rem 1.5rem;animation:fadeIn .4s ease}
+.welcome-icon{width:52px;height:52px;border-radius:14px;background:var(--blue2);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.welcome-icon svg{width:28px;height:28px}
+.welcome h2{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;margin-bottom:6px}
+.welcome p{font-size:12.5px;color:var(--text2);line-height:1.65;max-width:360px;margin:0 auto 1.25rem}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.chip{font-size:11.5px;padding:5px 12px;border-radius:20px;cursor:pointer;background:var(--bg3);border:1px solid var(--border2);color:var(--skylight);transition:all .15s;font-family:'Inter',sans-serif}
+.chip:hover{background:var(--blue);border-color:var(--blue2);color:#fff}
+.msg-row{display:flex;gap:10px;align-items:flex-end;animation:slideUp .3s ease}
+.msg-row.user{flex-direction:row-reverse}
+.av{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.av.ai{background:var(--blue2);color:#fff}
+.av.user{background:var(--bg4);border:1px solid var(--border2);color:var(--text2)}
+.bubble{max-width:82%;padding:11px 15px;font-size:13.5px;line-height:1.72;border-radius:14px}
+.bubble.ai{background:var(--card);border:1px solid var(--border2);border-bottom-left-radius:4px;color:var(--text)}
+.bubble.user{background:var(--blue2);border-bottom-right-radius:4px;color:#fff}
+.bubble.ai table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0}
+.bubble.ai th{background:var(--bg4);color:var(--text2);font-size:10px;letter-spacing:.8px;text-transform:uppercase;padding:6px 10px;text-align:left;border-bottom:1px solid var(--border2);font-weight:500}
+.bubble.ai td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text);font-size:12.5px}
+.bubble.ai tr:last-child td{border-bottom:none}
+.bubble.ai tr:hover td{background:rgba(90,164,245,0.05)}
+.num-cell{font-weight:600;color:var(--sky)}
+.src-block{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11px}
+.src-lbl{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);font-weight:600}
+.src-pill{color:var(--skylight);text-decoration:none;font-weight:500;background:var(--bg4);border:1px solid var(--border);border-radius:20px;padding:2px 9px;font-size:10px;transition:all .15s}
+.src-pill:hover{background:var(--blue);color:#fff;border-color:var(--blue2)}
+.msg-actions{display:flex;gap:4px;margin-top:6px;opacity:0;transition:opacity .2s}
+.msg-row:hover .msg-actions{opacity:1}
+.action-btn{padding:3px 9px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text3);font-size:10px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+.action-btn:hover{background:var(--bg4);color:var(--text);border-color:var(--border2)}
+.dots{display:flex;gap:5px;padding:3px 0}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--sky);animation:bounce 1.3s infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+.input-zone{padding:.9rem 1.25rem 1.1rem;flex-shrink:0;background:var(--bg2);border-top:1px solid var(--border)}
+.input-box{display:flex;align-items:flex-end;gap:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:14px;padding:10px 10px 10px 14px;transition:border-color .2s,box-shadow .2s}
+.input-box:focus-within{border-color:var(--sky);box-shadow:0 0 0 3px rgba(91,164,245,0.1)}
+.sidebar-toggle{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg4);cursor:pointer;color:var(--text2);font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.sidebar-toggle:hover{background:var(--bg3);color:var(--text)}
+textarea#q{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:'Inter',sans-serif;font-size:13.5px;resize:none;line-height:1.5;min-height:22px;max-height:110px}
+textarea#q::placeholder{color:var(--text3)}
+#send-btn{width:36px;height:36px;border-radius:10px;flex-shrink:0;background:var(--blue2);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+#send-btn:hover{background:var(--sky);transform:translateY(-1px)}
+#send-btn:active{transform:scale(.93)}
+#send-btn:disabled{background:var(--bg4);cursor:default;transform:none}
+#send-btn svg{width:15px;height:15px;fill:#fff}
+.input-hint{margin-top:6px;font-size:10px;color:var(--text3);text-align:center}
+
+/* ══════════════════════════════════════════
+   GRAPH MODULE
+══════════════════════════════════════════ */
+#graph-panel{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.25rem}
+
+.graph-section{background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:1.25rem}
+.graph-section-title{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);font-weight:600;margin-bottom:1rem}
+
+/* player inputs */
+.players-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.player-slot{display:flex;align-items:flex-start;gap:6px;position:relative}
+.player-color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:10px}
+.player-input-wrap{flex:1;position:relative}
+.player-input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 10px;color:var(--text);font-family:'Inter',sans-serif;font-size:12.5px;outline:none;transition:border-color .2s}
+.player-input:focus{border-color:var(--sky)}
+.player-input::placeholder{color:var(--text3)}
+.player-selected-badge{display:none;align-items:center;gap:6px;margin-top:4px;padding:4px 8px;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;font-size:11px;color:var(--text2)}
+.player-selected-badge .flag{font-size:14px}
+.player-selected-badge .info{display:flex;flex-direction:column;gap:1px}
+.player-selected-badge .pname{font-weight:600;color:var(--text);font-size:11.5px}
+.player-selected-badge .pmeta{color:var(--text3);font-size:10px}
+.player-selected-badge .clear-player{margin-left:auto;cursor:pointer;color:var(--text3);font-size:12px;padding:2px 4px;border-radius:4px;border:none;background:transparent;transition:color .15s}
+.player-selected-badge .clear-player:hover{color:#f09595}
+
+/* autocomplete dropdown */
+.autocomplete-dropdown{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:200;
+  background:var(--bg2);border:1px solid var(--border2);border-radius:10px;
+  overflow:hidden;box-shadow:0 8px 24px var(--shadow);
+  display:none;max-height:240px;overflow-y:auto;
+}
+.autocomplete-dropdown.open{display:block}
+.ac-item{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;
+  cursor:pointer;transition:background .12s;border-bottom:1px solid var(--border);
+}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover,.ac-item.focused{background:var(--bg3)}
+.ac-flag{font-size:18px;flex-shrink:0;width:24px;text-align:center}
+.ac-info{flex:1;min-width:0}
+.ac-name{font-size:13px;font-weight:600;color:var(--text)}
+.ac-meta{font-size:11px;color:var(--text3);margin-top:1px}
+.ac-pos{font-size:10px;padding:2px 6px;border-radius:4px;background:var(--bg4);color:var(--sky);font-weight:500;flex-shrink:0}
+.ac-loading{padding:12px;text-align:center;font-size:12px;color:var(--text3);display:flex;align-items:center;justify-content:center;gap:8px}
+
+.remove-player{width:22px;height:22px;border-radius:6px;border:none;background:var(--bg4);color:var(--text3);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;margin-top:7px}
+.remove-player:hover{background:rgba(226,75,74,0.2);color:#f09595}
+.add-player-btn{display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;border:1px dashed var(--border2);background:transparent;color:var(--text3);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;margin-top:4px}
+.add-player-btn:hover{border-color:var(--sky);color:var(--sky)}
+
+/* filters row — season picker */
+.filters-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.filter-select{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;padding:6px 10px;cursor:pointer;outline:none;transition:border-color .2s}
+.filter-select:hover,.filter-select:focus{border-color:var(--sky)}
+.filter-label{font-size:11px;color:var(--text3);white-space:nowrap}
+
+/* season dropdown */
+.season-dropdown-wrap{position:relative}
+.season-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
+.season-btn:hover,.season-btn.open{border-color:var(--sky);color:var(--text)}
+.season-btn svg{width:12px;height:12px;transition:transform .2s}
+.season-btn.open svg{transform:rotate(180deg)}
+.season-panel{
+  position:absolute;top:calc(100% + 6px);left:0;z-index:200;
+  background:var(--bg2);border:1px solid var(--border2);border-radius:12px;
+  padding:1rem;width:320px;box-shadow:0 8px 24px var(--shadow);
+  display:none;
+}
+.season-panel.open{display:block}
+.season-panel-title{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;font-weight:600}
+.season-mode-tabs{display:flex;gap:4px;margin-bottom:10px}
+.smode-btn{flex:1;padding:5px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:var(--text3);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;text-align:center}
+.smode-btn.active{background:var(--blue);border-color:var(--blue2);color:#fff}
+.seasons-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-height:200px;overflow-y:auto}
+.season-opt{padding:5px 4px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .12s;text-align:center}
+.season-opt:hover{border-color:var(--sky);color:var(--text)}
+.season-opt.selected{background:var(--blue);border-color:var(--blue2);color:#fff}
+.season-confirm-btn{width:100%;margin-top:10px;padding:7px;border-radius:7px;background:var(--blue2);color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:background .15s}
+.season-confirm-btn:hover{background:var(--sky)}
+.filter-label{font-size:11px;color:var(--text3);white-space:nowrap}
+
+/* metrics */
+.metrics-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.metric-chip{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);transition:all .15s}
+.metric-chip.on{background:var(--blue);border-color:var(--blue2);color:#fff}
+.metric-chip:hover{border-color:var(--sky);color:var(--text)}
+.metric-chip.on:hover{background:var(--sky)}
+.metric-input{flex:1;min-width:140px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;padding:6px 10px;outline:none;transition:border-color .2s}
+.metric-input:focus{border-color:var(--sky)}
+.metric-input::placeholder{color:var(--text3)}
+
+/* chart type selector */
+.chart-type-row{display:flex;gap:6px;flex-wrap:wrap}
+.chart-type-btn{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);transition:all .15s;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:5px}
+.chart-type-btn.active{background:var(--blue);border-color:var(--blue2);color:#fff}
+.chart-type-btn:hover{border-color:var(--sky);color:var(--text)}
+.chart-type-btn.active:hover{background:var(--sky)}
+
+/* generate btn */
+.generate-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.generate-btn{padding:9px 22px;border-radius:9px;background:var(--blue2);color:#fff;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;display:flex;align-items:center;gap:7px}
+.generate-btn:hover{background:var(--sky);transform:translateY(-1px)}
+.generate-btn:disabled{background:var(--bg4);cursor:default;transform:none;color:var(--text3)}
+.auto-suggest-btn{padding:9px 16px;border-radius:9px;background:var(--bg3);color:var(--text2);font-size:12px;font-weight:500;border:1px solid var(--border2);cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s}
+.auto-suggest-btn:hover{background:var(--bg4);border-color:var(--sky);color:var(--text)}
+
+/* chart canvas area */
+.chart-output-section{display:flex;flex-direction:column;gap:.75rem}
+.chart-area{background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:1.5rem;min-height:380px;display:flex;align-items:center;justify-content:center;flex-direction:column;position:relative}
+.chart-placeholder{text-align:center;color:var(--text3)}
+.chart-placeholder svg{width:48px;height:48px;margin:0 auto 12px;opacity:.4}
+.chart-placeholder p{font-size:13px}
+.chart-loading-wrap{display:flex;align-items:center;justify-content:center;width:100%;padding:2rem 0}
+.chart-canvas-wrap{width:100%;position:relative}
+.chart-canvas-wrap canvas{max-height:400px}
+
+/* legend */
+.chart-legend{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;padding:.25rem 0}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+
+/* loading state */
+.chart-loading{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)}
+
+/* insight box */
+.insight-box{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;font-size:13px;color:var(--text2);line-height:1.7}
+.insight-box strong{color:var(--text);font-weight:500}
+
+/* toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--bg4);border:1px solid var(--border2);border-radius:9px;padding:8px 16px;font-size:12px;color:var(--text);opacity:0;transition:all .3s;pointer-events:none;z-index:999}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:680px){
+  .sidebar{position:absolute;top:0;bottom:0;left:0;z-index:50;width:240px;box-shadow:4px 0 20px var(--shadow)}
+  .sidebar.hidden{transform:translateX(-100%);display:flex}
+  .features{grid-template-columns:1fr 1fr}
+  .hero h1{font-size:2rem}
+  .nav{padding:0 1rem}
+  .players-grid{grid-template-columns:1fr}
+  .tab-btn{padding:10px 12px;font-size:12px}
+}
+@media(max-width:420px){
+  .features{grid-template-columns:1fr}
+  .hero-btns{flex-direction:column;align-items:center}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LANDING ══ -->
+<div id="landing">
+  <nav class="nav">
+    <a class="logo" href="#">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <span class="logo-name">Kick<span>Data</span></span>
+    </a>
+    <div class="nav-right">
+      <div class="lang-select-wrap">
+        <select id="lang-select" onchange="setLang(this.value)">
+          <option value="fr">🇫🇷 Français</option>
+          <option value="en">🇬🇧 English</option>
+          <option value="es">🇪🇸 Español</option>
+          <option value="de">🇩🇪 Deutsch</option>
+          <option value="it">🇮🇹 Italiano</option>
+        </select>
+      </div>
+      <button class="theme-btn" id="theme-btn-land" onclick="toggleTheme()">🌙</button>
+      <button class="cta-nav" id="cta-launch" onclick="goApp()">Lancer l'app →</button>
+    </div>
+  </nav>
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <h1 id="hero-title">Les stats football,<br/><em>répondues en secondes</em></h1>
+    <p id="hero-sub">Posez n'importe quelle question statistique sur le football mondial. KickData analyse, compare et répond avec la source exacte.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="goApp()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span id="cta-text">Poser une question</span>
+      </button>
+    </div>
+    <div class="hero-visual">
+      <div class="chart-demo">
+        <svg viewBox="0 0 420 120" fill="none">
+          <defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2272f5" stop-opacity=".25"/><stop offset="100%" stop-color="#2272f5" stop-opacity="0"/></linearGradient></defs>
+          <line x1="0" y1="20" x2="420" y2="20" stroke="rgba(90,160,240,0.08)" stroke-width="1"/>
+          <line x1="0" y1="50" x2="420" y2="50" stroke="rgba(90,160,240,0.08)" stroke-width="1"/>
+          <line x1="0" y1="80" x2="420" y2="80" stroke="rgba(90,160,240,0.08)" stroke-width="1"/>
+          <path d="M0 90 C40 85,70 60,100 55 C130 50,155 70,180 45 C210 20,240 30,270 25 C300 20,330 35,360 20 C385 8,410 15,420 12 L420 120 L0 120Z" fill="url(#lg)"/>
+          <path d="M0 90 C40 85,70 60,100 55 C130 50,155 70,180 45 C210 20,240 30,270 25 C300 20,330 35,360 20 C385 8,410 15,420 12" stroke="#2272f5" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="100" cy="55" r="4" fill="#2272f5"/><circle cx="180" cy="45" r="4" fill="#5ba4f5"/><circle cx="270" cy="25" r="4" fill="#2272f5"/><circle cx="360" cy="20" r="4" fill="#5ba4f5"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+  <section class="features" id="feats-section"></section>
+  <div class="sources-strip">
+    <span class="src-name">FBREF</span><span class="src-name">TRANSFERMARKT</span><span class="src-name">SOFASCORE</span>
+    <span class="src-name">WHOSCORED</span><span class="src-name">UNDERSTAT</span><span class="src-name">XGSTAT</span>
+    <span class="src-name">FOOTYSTATS</span><span class="src-name">OPTA</span><span class="src-name">STATSBOMB</span>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <nav class="app-nav">
+    <div class="app-nav-left">
+      <button class="back-btn" onclick="goLanding()">←</button>
+      <span class="app-logo-name">Kick<span>Data</span></span>
+    </div>
+    <div class="app-nav-right">
+      <div class="lang-select-wrap">
+        <select id="lang-select-app" onchange="setLang(this.value)">
+          <option value="fr">🇫🇷 FR</option><option value="en">🇬🇧 EN</option>
+          <option value="es">🇪🇸 ES</option><option value="de">🇩🇪 DE</option><option value="it">🇮🇹 IT</option>
+        </select>
+      </div>
+      <button class="theme-btn" id="theme-btn-app" onclick="toggleTheme()">🌙</button>
+    </div>
+  </nav>
+
+  <!-- TABS -->
+  <div class="app-tabs">
+    <button class="tab-btn active" id="tab-chat-btn" onclick="switchTab('chat')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span id="tab-chat-label">Chat</span>
+    </button>
+    <button class="tab-btn" id="tab-graph-btn" onclick="switchTab('graph')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span id="tab-graph-label">Graphiques</span>
+    </button>
+  </div>
+
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <div class="sb-head">
+        <span class="sb-head-title" id="sb-menu-title">Historique</span>
+        <button class="sb-close" onclick="toggleSidebar()">✕</button>
+      </div>
+      <div class="sb-scroll">
+        <div id="hist-list"><span style="font-size:11px;color:var(--text3);padding:4px 0;display:block">Aucune question encore</span></div>
+      </div>
+    </div>
+
+    <!-- CHAT PANEL -->
+    <div class="tab-panel active" id="panel-chat" style="flex-direction:column">
+      <div class="chat-main">
+        <div class="chat-messages" id="messages">
+          <div class="welcome">
+            <div class="welcome-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <h2 id="welcome-title">Bienvenue sur KickData</h2>
+            <p id="welcome-sub">Posez votre question en langage naturel. Je réponds avec des données précises et la source vérifiable.</p>
+            <div class="chips" id="chips"></div>
+          </div>
+        </div>
+        <div class="input-zone">
+          <div class="input-box">
+            <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+            <textarea id="q" rows="1" onkeydown="onKey(event)" oninput="grow(this)"></textarea>
+            <button id="send-btn" onclick="send()">
+              <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+            </button>
+          </div>
+          <div class="input-hint" id="chat-hint">Entrée pour envoyer · Shift+Entrée pour nouvelle ligne</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRAPH PANEL -->
+    <div class="tab-panel" id="panel-graph">
+      <div id="graph-panel">
+
+        <!-- Players -->
+        <div class="graph-section">
+          <div class="graph-section-title" id="g-players-title">Joueurs à comparer</div>
+          <div class="players-grid" id="players-grid"></div>
+          <button class="add-player-btn" id="add-player-btn" onclick="addPlayerSlot()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span id="add-player-label">Ajouter un joueur</span>
+          </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="graph-section">
+          <div class="graph-section-title" id="g-filter-title">Période & Compétition</div>
+          <div class="filters-row">
+            <span class="filter-label" id="g-period-label">Période :</span>
+
+            <!-- Season picker -->
+            <div class="season-dropdown-wrap" id="season-dropdown-wrap">
+              <button class="season-btn" id="season-btn-trigger" onclick="toggleSeasonPanel()">
+                <span id="season-btn-label">All time</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="season-panel" id="season-panel">
+                <div class="season-panel-title" id="sp-title">Choisir la période</div>
+                <div class="season-mode-tabs">
+                  <button class="smode-btn active" data-mode="alltime" onclick="setSeasonMode(this,'alltime')" id="smode-alltime">All time</button>
+                  <button class="smode-btn" data-mode="single" onclick="setSeasonMode(this,'single')" id="smode-single">Saison</button>
+                  <button class="smode-btn" data-mode="range" onclick="setSeasonMode(this,'range')" id="smode-range">Intervalle</button>
+                </div>
+                <div id="seasons-grid-wrap" style="display:none">
+                  <div class="seasons-grid" id="seasons-grid"></div>
+                </div>
+                <button class="season-confirm-btn" id="season-confirm-btn" onclick="confirmSeason()">Confirmer</button>
+              </div>
+            </div>
+
+            <span class="filter-label" id="g-comp-label">Compétition :</span>
+            <select class="filter-select" id="comp-select">
+              <option value="all">Toutes</option>
+              <option value="pl">Premier League</option>
+              <option value="ll">La Liga</option>
+              <option value="sa">Serie A</option>
+              <option value="bl">Bundesliga</option>
+              <option value="l1">Ligue 1</option>
+              <option value="ucl">Champions League</option>
+              <option value="uel">Europa League</option>
+              <option value="wc">Coupe du Monde</option>
+              <option value="nation">Sélection nationale</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Metrics -->
+        <div class="graph-section">
+          <div class="graph-section-title" id="g-metrics-title">Métriques</div>
+          <div class="metrics-row" id="metrics-chips"></div>
+          <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+            <input class="metric-input" id="custom-metric" placeholder="Ajouter une métrique personnalisée..." onkeydown="addCustomMetric(event)"/>
+            <button class="auto-suggest-btn" onclick="autoSuggestMetrics()" id="auto-btn">✨ Suggestions auto</button>
+          </div>
+        </div>
+
+        <!-- Chart type -->
+        <div class="graph-section">
+          <div class="graph-section-title" id="g-charttype-title">Type de graphique</div>
+          <div class="chart-type-row">
+            <button class="chart-type-btn active" data-type="radar" onclick="selectChartType(this)">🕸️ Radar</button>
+            <button class="chart-type-btn" data-type="bar" onclick="selectChartType(this)">📊 Barres</button>
+            <button class="chart-type-btn" data-type="line" onclick="selectChartType(this)">📈 Ligne temporelle</button>
+            <button class="chart-type-btn" data-type="scatter" onclick="selectChartType(this)">⚡ Scatter</button>
+          </div>
+          <!-- Scatter axis selectors -->
+          <div id="scatter-axes" style="display:none;margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span class="filter-label">Axe X :</span>
+            <select class="filter-select" id="scatter-x"><option value="xg">xG</option><option value="goals">Buts</option><option value="assists">Passes D.</option><option value="shots">Tirs</option><option value="ppda">PPDA</option></select>
+            <span class="filter-label">Axe Y :</span>
+            <select class="filter-select" id="scatter-y"><option value="goals">Buts</option><option value="xg">xG</option><option value="assists">Passes D.</option><option value="progressive_passes">Prog. Passes</option><option value="dribbles">Dribbles</option></select>
+          </div>
+        </div>
+
+        <!-- Generate -->
+        <div class="graph-section">
+          <div class="generate-row">
+            <button class="generate-btn" onclick="generateChart()" id="gen-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span id="gen-btn-label">Générer le graphique</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Chart output -->
+        <div class="chart-output-section">
+          <div class="chart-area" id="chart-area">
+            <div class="chart-placeholder" id="chart-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+              <p id="chart-placeholder-text">Configurez et générez votre graphique</p>
+            </div>
+            <div class="chart-loading-wrap" id="chart-loading-wrap" style="display:none">
+              <div class="chart-loading"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span id="chart-loading-label">Génération en cours…</span></div>
+            </div>
+            <div class="chart-canvas-wrap" id="chart-canvas-wrap" style="display:none">
+              <canvas id="main-chart"></canvas>
+            </div>
+          </div>
+          <div class="chart-legend" id="chart-legend"></div>
+          <div class="insight-box" id="insight-box" style="display:none"></div>
+        </div>
+
+      </div><!-- /graph-panel -->
+    </div><!-- /panel-graph -->
+
+  </div><!-- /app-layout -->
+</div><!-- /app -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════════════════════════════════════
+   PLAYER COLORS
+════════════════════════════════════════ */
+const PLAYER_COLORS = ['#2272f5','#f5a623','#4ade80','#f43f5e','#a78bfa','#22d3ee','#fb923c'];
+
+/* ════════════════════════════════════════
+   TRANSLATIONS
+════════════════════════════════════════ */
+const T={
+  fr:{heroTitle:'Les stats football,<br/><em>répondues en secondes</em>',heroSub:'Posez n\'importe quelle question statistique sur le football mondial.',ctaText:'Poser une question',ctaNav:'Lancer l\'app →',tabChat:'Chat',tabGraph:'Graphiques',welcomeTitle:'Bienvenue sur KickData',welcomeSub:'Posez votre question en langage naturel. Je réponds avec des données précises et la source vérifiable.',placeholder:'Ex : Combien de buts Mbappé a marqué en Coupe du monde ?',hint:'Entrée pour envoyer · Shift+Entrée pour nouvelle ligne',sbQuick:'Questions rapides',sbHist:'Historique',sbEmpty:'Aucune question encore',liveSources:'9 sources actives',copy:'📋 Copier',share:'↗ Partager',copied:'✅ Copié',sbMenu:'Menu',gPlayersTitle:'Joueurs à comparer',addPlayer:'Ajouter un joueur',gFilterTitle:'Période & Compétition',gPeriodLabel:'Période :',gCompLabel:'Compétition :',gMetricsTitle:'Métriques',gChartTypeTitle:'Type de graphique',genBtn:'Générer le graphique',autoBtn:'✨ Suggestions auto',chartPlaceholder:'Configurez et générez votre graphique',insightLoading:'Analyse IA en cours…',sourceWord:'Source',
+    chips:['De Bruyne → Sterling','Haaland xG 2023-24','PPDA Ligue 1','Valeur Pedri','Ronaldo 9 Serie A','Record Camp Nou'],
+    chipQ:['Combien de passes décisives De Bruyne a offertes à Sterling à Manchester City ?','Quel est le xG de Erling Haaland en Premier League 2023-24 ?','Qui a le meilleur PPDA en Ligue 1 cette saison ?','Quelle est la valeur marchande de Pedri en 2024 ?','Combien de buts Ronaldo le Brésilien a-t-il marqué en Serie A ?','Quel est le record d\'affluence au Camp Nou ?'],
+    sbBtns:['De Bruyne → Sterling, Man City ?','Valeur marchande Bellingham 2025 ?','Meilleur PPDA PL 2023-24 ?','Salaire Mbappé Real Madrid ?','Haaland buts C1 toutes saisons ?','Record affluence Bernabéu ?','Progressive passes/90 Liga 2024 ?','Ronaldo buts Serie A Juventus ?','Top buteur MLS 2023 ?'],
+    systemLang:'Réponds en français.',
+    metricsDefault:['Buts','Passes D.','xG','xA','PPDA','Tirs/90','Dribbles','Prog. Passes','Duels aériens','Interceptions']
+  },
+  en:{heroTitle:'Football stats,<br/><em>answered in seconds</em>',heroSub:'Ask any statistical question about world football.',ctaText:'Ask a question',ctaNav:'Launch app →',tabChat:'Chat',tabGraph:'Charts',welcomeTitle:'Welcome to KickData',welcomeSub:'Ask your question in natural language. I reply with precise data and a verifiable source.',placeholder:'E.g. How many goals did Haaland score in the Champions League?',hint:'Enter to send · Shift+Enter for new line',sbQuick:'Quick questions',sbHist:'History',sbEmpty:'No questions yet',liveSources:'9 active sources',copy:'📋 Copy',share:'↗ Share',copied:'✅ Copied',sbMenu:'Menu',gPlayersTitle:'Players to compare',addPlayer:'Add a player',gFilterTitle:'Period & Competition',gPeriodLabel:'Period:',gCompLabel:'Competition:',gMetricsTitle:'Metrics',gChartTypeTitle:'Chart type',genBtn:'Generate chart',autoBtn:'✨ Auto suggest',chartPlaceholder:'Configure and generate your chart',insightLoading:'AI analysis in progress…',sourceWord:'Source',
+    chips:['De Bruyne → Sterling','Haaland xG 2023-24','PPDA Ligue 1','Pedri value','Ronaldo 9 Serie A','Camp Nou record'],
+    chipQ:['How many assists did De Bruyne provide to Sterling at Manchester City?','What is Erling Haaland\'s xG in the 2023-24 Premier League?','Which team has the best PPDA in Ligue 1?','What is Pedri\'s market value in 2024?','How many goals did Brazilian Ronaldo score in Serie A?','What is the attendance record at Camp Nou?'],
+    sbBtns:['De Bruyne → Sterling, Man City?','Bellingham market value 2025?','Best PPDA PL 2023-24?','Mbappé salary Real Madrid?','Haaland UCL goals all seasons?','Bernabeu attendance record?','Progressive passes/90 Liga 2024?','Ronaldo goals Serie A Juventus?','Top scorer MLS 2023?'],
+    systemLang:'Reply in English.',
+    metricsDefault:['Goals','Assists','xG','xA','PPDA','Shots/90','Dribbles','Prog. Passes','Aerials','Interceptions']
+  },
+  es:{heroTitle:'Estadísticas de fútbol,<br/><em>respondidas en segundos</em>',heroSub:'Haz cualquier pregunta estadística sobre el fútbol mundial.',ctaText:'Hacer una pregunta',ctaNav:'Abrir la app →',tabChat:'Chat',tabGraph:'Gráficos',welcomeTitle:'Bienvenido a KickData',welcomeSub:'Haz tu pregunta en lenguaje natural. Respondo con datos precisos y fuente verificable.',placeholder:'Ej: ¿Cuántos goles marcó Mbappé en el Mundial?',hint:'Enter para enviar · Shift+Enter para nueva línea',sbQuick:'Preguntas rápidas',sbHist:'Historial',sbEmpty:'Ninguna pregunta aún',liveSources:'9 fuentes activas',copy:'📋 Copiar',share:'↗ Compartir',copied:'✅ Copiado',sbMenu:'Menú',gPlayersTitle:'Jugadores a comparar',addPlayer:'Añadir jugador',gFilterTitle:'Periodo & Competición',gPeriodLabel:'Periodo:',gCompLabel:'Competición:',gMetricsTitle:'Métricas',gChartTypeTitle:'Tipo de gráfico',genBtn:'Generar gráfico',autoBtn:'✨ Sugerencias auto',chartPlaceholder:'Configura y genera tu gráfico',insightLoading:'Análisis IA en curso…',sourceWord:'Fuente',
+    chips:['De Bruyne → Sterling','Haaland xG 2023-24','PPDA Ligue 1','Valor Pedri','Ronaldo 9 Serie A','Récord Camp Nou'],
+    chipQ:['¿Cuántas asistencias dio De Bruyne a Sterling en el Manchester City?','¿Cuál es el xG de Erling Haaland en la Premier League 2023-24?','¿Qué equipo tiene el mejor PPDA en la Ligue 1?','¿Cuál es el valor de mercado de Pedri en 2024?','¿Cuántos goles marcó el Ronaldo brasileño en la Serie A?','¿Cuál es el récord de asistencia en el Camp Nou?'],
+    sbBtns:['¿Asistencias De Bruyne → Sterling?','¿Valor Bellingham 2025?','¿Mejor PPDA PL 2023-24?','¿Salario Mbappé Real Madrid?','¿Goles Haaland UCL?','¿Récord Bernabéu?','¿Pases progresivos/90 Liga?','¿Goles Ronaldo Serie A Juventus?','¿Máximo goleador MLS 2023?'],
+    systemLang:'Responde en español.',
+    metricsDefault:['Goles','Asistencias','xG','xA','PPDA','Tiros/90','Regates','Pases Prog.','Duelos aéreos','Intercepciones']
+  },
+  de:{heroTitle:'Fußball-Statistiken,<br/><em>in Sekunden beantwortet</em>',heroSub:'Stellen Sie jede statistische Frage zum Weltfußball.',ctaText:'Frage stellen',ctaNav:'App starten →',tabChat:'Chat',tabGraph:'Diagramme',welcomeTitle:'Willkommen bei KickData',welcomeSub:'Stellen Sie Ihre Frage in natürlicher Sprache. Ich antworte mit präzisen Daten.',placeholder:'Z.B.: Wie viele Tore hat Haaland in der Champions League erzielt?',hint:'Enter zum Senden · Shift+Enter für neue Zeile',sbQuick:'Schnelle Fragen',sbHist:'Verlauf',sbEmpty:'Noch keine Fragen',liveSources:'9 aktive Quellen',copy:'📋 Kopieren',share:'↗ Teilen',copied:'✅ Kopiert',sbMenu:'Menü',gPlayersTitle:'Spieler vergleichen',addPlayer:'Spieler hinzufügen',gFilterTitle:'Zeitraum & Wettbewerb',gPeriodLabel:'Zeitraum:',gCompLabel:'Wettbewerb:',gMetricsTitle:'Metriken',gChartTypeTitle:'Diagrammtyp',genBtn:'Diagramm erstellen',autoBtn:'✨ Auto-Vorschläge',chartPlaceholder:'Konfigurieren und erstellen Sie Ihr Diagramm',insightLoading:'KI-Analyse läuft…',sourceWord:'Quelle',
+    chips:['De Bruyne → Sterling','Haaland xG 2023-24','PPDA Ligue 1','Pedri Marktwert','Ronaldo 9 Serie A','Camp Nou Rekord'],
+    chipQ:['Wie viele Assists gab De Bruyne an Sterling bei Manchester City?','Was ist Erling Haalands xG in der Premier League 2023-24?','Welches Team hat den besten PPDA in der Ligue 1?','Was ist Pedris Marktwert 2024?','Wie viele Tore hat der brasilianische Ronaldo in der Serie A erzielt?','Was ist der Zuschauerrekord im Camp Nou?'],
+    sbBtns:['De Bruyne → Sterling Assists?','Bellingham Marktwert 2025?','Bester PPDA PL 2023-24?','Mbappé Gehalt Real Madrid?','Haaland UCL Tore?','Bernabéu Zuschauerrekord?','Progressive Pässe/90 Liga?','Ronaldo Tore Serie A Juventus?','Torschützenkönig MLS 2023?'],
+    systemLang:'Antworte auf Deutsch.',
+    metricsDefault:['Tore','Vorlagen','xG','xA','PPDA','Schüsse/90','Dribblings','Prog. Pässe','Luftduelle','Abfangaktionen']
+  },
+  it:{heroTitle:'Statistiche di calcio,<br/><em>risposte in pochi secondi</em>',heroSub:'Fai qualsiasi domanda statistica sul calcio mondiale.',ctaText:'Fai una domanda',ctaNav:'Apri l\'app →',tabChat:'Chat',tabGraph:'Grafici',welcomeTitle:'Benvenuto su KickData',welcomeSub:'Fai la tua domanda in linguaggio naturale. Rispondo con dati precisi e fonte verificabile.',placeholder:'Es: Quanti gol ha segnato Mbappé al Mondiale?',hint:'Invio per inviare · Shift+Invio per nuova riga',sbQuick:'Domande rapide',sbHist:'Cronologia',sbEmpty:'Nessuna domanda ancora',liveSources:'9 fonti attive',copy:'📋 Copia',share:'↗ Condividi',copied:'✅ Copiato',sbMenu:'Menu',gPlayersTitle:'Giocatori da confrontare',addPlayer:'Aggiungi giocatore',gFilterTitle:'Periodo & Competizione',gPeriodLabel:'Periodo:',gCompLabel:'Competizione:',gMetricsTitle:'Metriche',gChartTypeTitle:'Tipo di grafico',genBtn:'Genera grafico',autoBtn:'✨ Suggerimenti auto',chartPlaceholder:'Configura e genera il tuo grafico',insightLoading:'Analisi IA in corso…',sourceWord:'Fonte',
+    chips:['De Bruyne → Sterling','Haaland xG 2023-24','PPDA Ligue 1','Valore Pedri','Ronaldo 9 Serie A','Record Camp Nou'],
+    chipQ:['Quanti assist ha dato De Bruyne a Sterling al Manchester City?','Qual è l\'xG di Erling Haaland in Premier League 2023-24?','Quale squadra ha il miglior PPDA in Ligue 1?','Qual è il valore di mercato di Pedri nel 2024?','Quanti gol ha segnato il Ronaldo brasiliano in Serie A?','Qual è il record di presenze al Camp Nou?'],
+    sbBtns:['Assist De Bruyne → Sterling?','Valore Bellingham 2025?','Miglior PPDA PL 2023-24?','Stipendio Mbappé Real Madrid?','Gol Haaland UCL?','Record Bernabéu?','Passaggi progressivi/90 Liga?','Gol Ronaldo Serie A Juventus?','Capocannoniere MLS 2023?'],
+    systemLang:'Rispondi in italiano.',
+    metricsDefault:['Gol','Assist','xG','xA','PPDA','Tiri/90','Dribbling','Pass. Prog.','Duelli aerei','Intercetti']
+  }
+};
+
+let lang='fr', dark=true;
+
+/* ── THEME ── */
+function toggleTheme(){
+  dark=!dark;
+  document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+  const ic=dark?'🌙':'☀️';
+  document.getElementById('theme-btn-land').textContent=ic;
+  document.getElementById('theme-btn-app').textContent=ic;
+  if(currentChart) regenerateChartUI();
+}
+
+/* ── NAV ── */
+function goApp(){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('app').classList.add('active');
+  document.getElementById('q').focus();
+}
+function goLanding(){
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('landing').style.display='flex';
+}
+
+/* ── TABS ── */
+let currentTab='chat';
+function switchTab(tab){
+  currentTab=tab;
+  document.getElementById('panel-chat').classList.toggle('active',tab==='chat');
+  document.getElementById('panel-graph').classList.toggle('active',tab==='graph');
+  document.getElementById('tab-chat-btn').classList.toggle('active',tab==='chat');
+  document.getElementById('tab-graph-btn').classList.toggle('active',tab==='graph');
+}
+
+/* ── SIDEBAR ── */
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('hidden')}
+
+/* ── LANG ── */
+function setLang(l){
+  lang=l;
+  ['lang-select','lang-select-app'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=l});
+  applyLang();
+}
+
+function applyLang(){
+  const t=T[lang];
+  const s=(id,html,prop='innerHTML')=>{const el=document.getElementById(id);if(el)el[prop]=html};
+  s('hero-title',t.heroTitle);
+  s('hero-sub',t.heroSub,'textContent');
+  s('cta-text',t.ctaText,'textContent');
+  s('cta-launch',t.ctaNav,'textContent');
+  s('tab-chat-label',t.tabChat,'textContent');
+  s('tab-graph-label',t.tabGraph,'textContent');
+  s('welcome-title',t.welcomeTitle,'textContent');
+  s('welcome-sub',t.welcomeSub,'textContent');
+  s('app-live-label',t.liveSources,'textContent');
+  s('sb-menu-title',t.sbHist,'textContent');
+  s('chat-hint',t.hint,'textContent');
+  s('g-players-title',t.gPlayersTitle,'textContent');
+  s('add-player-label',t.addPlayer,'textContent');
+  s('g-filter-title',t.gFilterTitle,'textContent');
+  s('g-period-label',t.gPeriodLabel,'textContent');
+  s('g-comp-label',t.gCompLabel,'textContent');
+  s('g-metrics-title',t.gMetricsTitle,'textContent');
+  s('g-charttype-title',t.gChartTypeTitle,'textContent');
+  s('gen-btn-label',t.genBtn,'textContent');
+  s('auto-btn',t.autoBtn,'textContent');
+  s('chart-placeholder-text',t.chartPlaceholder,'textContent');
+  const qa=document.getElementById('q');if(qa)qa.placeholder=t.placeholder;
+  // chips
+  const chipsEl=document.getElementById('chips');
+  if(chipsEl) chipsEl.innerHTML=t.chips.map((c,i)=>`<span class="chip" onclick="pickChip('${t.chipQ[i].replace(/'/g,"\\'")}')">${c}</span>`).join('');
+  // metrics
+  renderMetricChips();
+  renderHist();
+  renderFeats();
+}
+
+function renderFeats(){
+  const feats=[
+    {icon:'⚡',titles:{fr:'Métriques avancées',en:'Advanced metrics',es:'Métricas avanzadas',de:'Erweiterte Metriken',it:'Metriche avanzate'},descs:{fr:'xG, xA, PPDA, progressive passes, carries, SCA, GCA et bien plus.',en:'xG, xA, PPDA, progressive passes, carries, SCA, GCA and much more.',es:'xG, xA, PPDA, pases progresivos y mucho más.',de:'xG, xA, PPDA, progressive Pässe und vieles mehr.',it:'xG, xA, PPDA, passaggi progressivi e molto altro.'}},
+    {icon:'📊',titles:{fr:'Graphiques comparatifs',en:'Comparison charts',es:'Gráficos comparativos',de:'Vergleichsdiagramme',it:'Grafici comparativi'},descs:{fr:'Radar, barres, timeline et scatter — comparez jusqu\'à 5+ joueurs sur n\'importe quelle période.',en:'Radar, bar, timeline and scatter — compare 5+ players over any period.',es:'Radar, barras, línea de tiempo y scatter — compara 5+ jugadores.',de:'Radar, Balken, Zeitlinie und Scatter — vergleiche 5+ Spieler.',it:'Radar, barre, linea temporale e scatter — confronta 5+ giocatori.'}},
+    {icon:'🌍',titles:{fr:'140+ ligues',en:'140+ leagues',es:'140+ ligas',de:'140+ Ligen',it:'140+ campionati'},descs:{fr:'PL, Liga, Serie A, Ligue 1, MLS, Eredivisie, Super Lig et toutes les grandes compétitions mondiales.',en:'PL, Liga, Serie A, Ligue 1, MLS, Eredivisie, Super Lig and all major competitions.',es:'PL, Liga, Serie A, Ligue 1, MLS, Eredivisie, Süper Lig y más.',de:'PL, Liga, Serie A, Ligue 1, MLS, Eredivisie, Süper Lig und mehr.',it:'PL, Liga, Serie A, Ligue 1, MLS, Eredivisie, Süper Lig e altro.'}},
+    {icon:'📅',titles:{fr:'Historique depuis 1990',en:'History since 1990',es:'Histórico desde 1990',de:'Geschichte seit 1990',it:'Storico dal 1990'},descs:{fr:'Stats de toutes les générations — Zidane, Ronaldo brésilien, Henry, et les stars d\'aujourd\'hui.',en:'Stats from all generations — Zidane, Brazilian Ronaldo, Henry, and today\'s stars.',es:'Estadísticas de todas las generaciones.',de:'Statistiken aller Generationen.',it:'Statistiche di tutte le generazioni.'}},
+    {icon:'💰',titles:{fr:'Données financières',en:'Financial data',es:'Datos financieros',de:'Finanzdaten',it:'Dati finanziari'},descs:{fr:'Valeurs marchandes, salaires estimés, transferts historiques.',en:'Market values, estimated salaries, historical transfers.',es:'Valores de mercado, salarios estimados, traspasos históricos.',de:'Marktwerte, Gehälter, historische Transfers.',it:'Valori di mercato, stipendi, trasferimenti storici.'}},
+    {icon:'🔗',titles:{fr:'9 sources vérifiées',en:'9 verified sources',es:'9 fuentes verificadas',de:'9 verifizierte Quellen',it:'9 fonti verificate'},descs:{fr:'FBref, Transfermarkt, Sofascore, WhoScored, Understat, Opta/StatsBomb et plus.',en:'FBref, Transfermarkt, Sofascore, WhoScored, Understat, Opta/StatsBomb and more.',es:'FBref, Transfermarkt, Sofascore, WhoScored, Understat, Opta/StatsBomb y más.',de:'FBref, Transfermarkt, Sofascore, WhoScored, Understat, Opta/StatsBomb und mehr.',it:'FBref, Transfermarkt, Sofascore, WhoScored, Understat, Opta/StatsBomb e altro.'}}
+  ];
+  const sec=document.getElementById('feats-section');
+  if(sec) sec.innerHTML=feats.map(f=>`<div class="feat"><div class="feat-icon">${f.icon}</div><h3>${f.titles[lang]}</h3><p>${f.descs[lang]}</p></div>`).join('');
+}
+
+/* ════════════════════════════════════════
+   CHAT
+════════════════════════════════════════ */
+function grow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px'}
+function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}}
+function useQ(el){document.getElementById('q').value=el.textContent.trim();document.getElementById('q').focus();if(window.innerWidth<680)toggleSidebar()}
+function pickChip(text){document.getElementById('q').value=text;document.getElementById('q').focus()}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+
+let histArr=[];
+
+function loadHist(){
+  try{const saved=localStorage.getItem('kd_history');if(saved)histArr=JSON.parse(saved)}catch{}
+}
+function saveHist(){
+  try{localStorage.setItem('kd_history',JSON.stringify(histArr))}catch{}
+}
+function addToHist(q){
+  // avoid duplicate consecutive
+  if(histArr.length&&histArr[0].q===q)return;
+  histArr.unshift({q,ts:Date.now()});
+  if(histArr.length>30)histArr.pop();
+  saveHist();renderHist();
+  // auto-open sidebar on first question
+  if(histArr.length===1){
+    const sb=document.getElementById('sidebar');
+    if(sb&&sb.classList.contains('hidden'))sb.classList.remove('hidden');
+  }
+}
+function clearHistory(){
+  histArr=[];saveHist();renderHist();showToast('🗑️ Historique effacé');
+}
+function formatTs(ts){
+  const d=new Date(ts);
+  const now=new Date();
+  const diffMin=Math.floor((now-d)/60000);
+  if(diffMin<1)return{fr:'À l\'instant',en:'Just now',es:'Ahora mismo',de:'Gerade eben',it:'Adesso'}[lang]||'Just now';
+  if(diffMin<60)return`${diffMin} min`;
+  const diffH=Math.floor(diffMin/60);
+  if(diffH<24)return`${diffH}h`;
+  return d.toLocaleDateString(lang==='fr'?'fr-FR':lang==='de'?'de-DE':lang==='es'?'es-ES':lang==='it'?'it-IT':'en-GB',{day:'numeric',month:'short'});
+}
+function renderHist(){
+  const el=document.getElementById('hist-list');if(!el)return;
+  const emptyLabel={fr:'Aucune question encore',en:'No questions yet',es:'Ninguna pregunta aún',de:'Noch keine Fragen',it:'Nessuna domanda ancora'}[lang]||'No questions yet';
+  if(!histArr.length){
+    el.innerHTML=`<span style="font-size:11px;color:var(--text3);padding:4px 0;display:block">${emptyLabel}</span>`;
+    return;
+  }
+  const clearLabel={fr:'Effacer l\'historique',en:'Clear history',es:'Borrar historial',de:'Verlauf löschen',it:'Cancella cronologia'}[lang]||'Clear history';
+  el.innerHTML=histArr.map(h=>`
+    <div class="hist-item" onclick="pickChip('${h.q.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')">
+      <div class="hist-q">${h.q}</div>
+      <div class="hist-time">${formatTs(h.ts)}</div>
+    </div>`).join('')+`<button class="hist-clear-btn" onclick="event.stopPropagation();clearHistory()">🗑️ ${clearLabel}</button>`;
+}
+
+function parseMd(text){
+  text=text.replace(/\|(.+)\|\n\|[-| :]+\|\n((?:\|.+\|\n?)+)/g,(_,header,body)=>{
+    const heads=header.split('|').map(h=>h.trim()).filter(Boolean);
+    const rows=body.trim().split('\n').map(r=>r.split('|').map(c=>c.trim()).filter(Boolean));
+    let t='<table><thead><tr>'+heads.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>';
+    rows.forEach(r=>{t+='<tr>'+r.map(c=>`<td class="${/^[\d.,]+%?$/.test(c)?'num-cell':''}">${c}</td>`).join('')+'</tr>'});
+    return t+'</tbody></table>';
+  });
+  text=text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  text=text.replace(/\n/g,'<br>');
+  return text;
+}
+
+const SITES={fbref:'https://fbref.com',transfermarkt:'https://www.transfermarkt.com',xgstat:'https://www.xgstat.com',smrtstats:'https://football.smrtstats.com',smrt:'https://football.smrtstats.com',sofascore:'https://www.sofascore.com',whoscored:'https://www.whoscored.com',understat:'https://understat.com',footystats:'https://footystats.org',opta:'https://www.statsperform.com',statsbomb:'https://statsbomb.com'};
+
+function renderAnswer(text){
+  const m=text.match(/(?:Source|Fuente|Quelle|Fonte)\s*[:：]\s*(.+)/i);
+  let body=text.replace(/(?:Source|Fuente|Quelle|Fonte)\s*[:：]\s*.+/i,'').trim();
+  body=parseMd(body);
+  let src='';
+  if(m){
+    const parts=m[1].trim().split(/,|&/).map(s=>s.trim()).filter(Boolean);
+    const pills=parts.map(p=>{const k=Object.keys(SITES).find(k=>p.toLowerCase().includes(k));return k?`<a class="src-pill" href="${SITES[k]}" target="_blank">${p}</a>`:`<span class="src-pill">${p}</span>`}).join('');
+    src=`<div class="src-block"><span class="src-lbl">${T[lang].sourceWord}</span>${pills}</div>`;
+  }
+  return body+src;
+}
+
+function addMsg(role,html){
+  const msgs=document.getElementById('messages');
+  const row=document.createElement('div');row.className='msg-row '+role;
+  const av=document.createElement('div');av.className='av '+role;av.textContent=role==='ai'?'KD':'→';
+  const wrap=document.createElement('div');
+  wrap.style.cssText='display:flex;flex-direction:column;align-items:'+(role==='user'?'flex-end':'flex-start')+';max-width:85%';
+  const bub=document.createElement('div');bub.className='bubble '+role;bub.innerHTML=html;
+  wrap.appendChild(bub);row.appendChild(av);row.appendChild(wrap);msgs.appendChild(row);
+  msgs.scrollTop=msgs.scrollHeight;
+  return {bub,wrap};
+}
+
+function copyText(btn){navigator.clipboard.writeText(btn.getAttribute('data-text')).then(()=>showToast(T[lang].copied))}
+function shareQ(btn){window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent('📊 KickData — '+btn.getAttribute('data-text').slice(0,200))}`,'_blank')}
+
+let hist=[],busy=false;
+
+const BASE_SYSTEM=`You are KickData, a professional-level football statistics expert with access to an exhaustive database:
+LEAGUES: Premier League, La Liga, Serie A, Bundesliga, Ligue 1, Champions League, Europa League, MLS, Eredivisie, Liga Portugal, Super Lig, Liga MX, Brasileirão, and all major world leagues.
+ADVANCED METRICS: xG, xA, xGOT, PPDA, progressive passes, progressive carries, pressures, SCA, GCA, touches final third, dribbles, aerials, interceptions, blocks, tackles.
+HISTORICAL DATA: Seasons from the 1990s — Zidane, Brazilian Ronaldo, Bergkamp, Henry, Shevchenko, etc.
+FINANCIAL DATA: Market values, transfer history, estimated salaries, release clauses.
+REFEREES: Cards per match, penalties given, trends. STADIUMS & ATTENDANCE: Capacities, records, averages.
+SOURCES: FBref, Transfermarkt, xGStat, SmrtStats, Sofascore, WhoScored, Understat, FootyStats, Opta/StatsBomb.
+INSTRUCTIONS: Be direct and factual, 2-5 sentences max. Give precise figures. If unsure, say so. Format as markdown table when appropriate. ALWAYS end with "Source: [site(s)]".`;
+
+async function send(){
+  if(busy)return;
+  const inp=document.getElementById('q');
+  const txt=inp.value.trim();if(!txt)return;
+  inp.value='';inp.style.height='auto';
+  const chipsEl=document.getElementById('chips');if(chipsEl)chipsEl.style.display='none';
+  busy=true;document.getElementById('send-btn').disabled=true;
+  addMsg('user',txt);addToHist(txt);
+  hist.push({role:'user',content:txt});
+  const {bub:aib,wrap:aiwrap}=addMsg('ai','<div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>');
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:BASE_SYSTEM+'\n\n'+T[lang].systemLang,messages:hist,tools:[{type:'web_search_20250305',name:'web_search'}]})
+    });
+    const data=await res.json();
+    const ans=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
+    hist.push({role:'assistant',content:ans||'…'});
+    aib.innerHTML=renderAnswer(ans||'No answer found.');
+    const acts=document.createElement('div');acts.className='msg-actions';
+    const safe=(ans||'').replace(/"/g,'&quot;');
+    acts.innerHTML=`<button class="action-btn" onclick="copyText(this)" data-text="${safe}">${T[lang].copy}</button><button class="action-btn" onclick="shareQ(this)" data-text="${safe}">${T[lang].share}</button>`;
+    aiwrap.appendChild(acts);
+  }catch{aib.innerHTML='<span style="color:#f09595">Connection error.</span>'}
+  busy=false;document.getElementById('send-btn').disabled=false;inp.focus();
+}
+
+/* ════════════════════════════════════════
+   SEASON PICKER
+════════════════════════════════════════ */
+const ALL_SEASONS=['1992-93','1993-94','1994-95','1995-96','1996-97','1997-98','1998-99','1999-00','2000-01','2001-02','2002-03','2003-04','2004-05','2005-06','2006-07','2007-08','2008-09','2009-10','2010-11','2011-12','2012-13','2013-14','2014-15','2015-16','2016-17','2017-18','2018-19','2019-20','2020-21','2021-22','2022-23','2023-24','2024-25'].reverse();
+let seasonMode='alltime',selectedSeasons=[],rangeStart=null;
+
+function toggleSeasonPanel(){
+  const panel=document.getElementById('season-panel');
+  const btn=document.getElementById('season-btn-trigger');
+  const open=panel.classList.toggle('open');
+  btn.classList.toggle('open',open);
+  if(open)renderSeasonsGrid();
+}
+function setSeasonMode(el,mode){
+  seasonMode=mode;
+  document.querySelectorAll('.smode-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('seasons-grid-wrap').style.display=(mode==='alltime')?'none':'block';
+  selectedSeasons=[];rangeStart=null;
+  renderSeasonsGrid();
+  if(mode==='alltime')document.getElementById('season-btn-label').textContent='All time';
+}
+function renderSeasonsGrid(){
+  const grid=document.getElementById('seasons-grid');
+  if(!grid||seasonMode==='alltime'){if(grid)grid.innerHTML='';return}
+  grid.innerHTML=ALL_SEASONS.map(s=>`<div class="season-opt ${selectedSeasons.includes(s)?'selected':''}" onclick="selectSeason('${s}')">${s}</div>`).join('');
+}
+function selectSeason(s){
+  if(seasonMode==='single'){selectedSeasons=[s];}
+  else if(seasonMode==='range'){
+    if(!rangeStart||selectedSeasons.length>=2){rangeStart=s;selectedSeasons=[s];}
+    else{
+      const fi=ALL_SEASONS.indexOf(rangeStart),ti=ALL_SEASONS.indexOf(s);
+      const [lo,hi]=fi<ti?[ti,fi]:[fi,ti];
+      selectedSeasons=ALL_SEASONS.slice(hi,lo+1);
+    }
+  }
+  renderSeasonsGrid();
+}
+function confirmSeason(){
+  let label='All time';
+  if(seasonMode==='single'&&selectedSeasons.length)label=selectedSeasons[0];
+  else if(seasonMode==='range'&&selectedSeasons.length>=2){
+    const sorted=[...selectedSeasons].sort();
+    label=`${sorted[0]} → ${sorted[sorted.length-1]}`;
+  }
+  document.getElementById('season-btn-label').textContent=label;
+  document.getElementById('season-panel').classList.remove('open');
+  document.getElementById('season-btn-trigger').classList.remove('open');
+}
+function getSeasonString(){
+  const lbl=document.getElementById('season-btn-label').textContent;
+  return lbl==='All time'?'all time career':lbl;
+}
+document.addEventListener('click',e=>{
+  const wrap=document.getElementById('season-dropdown-wrap');
+  if(wrap&&!wrap.contains(e.target)){
+    document.getElementById('season-panel').classList.remove('open');
+    document.getElementById('season-btn-trigger').classList.remove('open');
+  }
+});
+
+/* ════════════════════════════════════════
+   PLAYER AUTOCOMPLETE
+════════════════════════════════════════ */
+let players=[
+  {name:'',displayName:'',meta:'',flag:'',color:PLAYER_COLORS[0]},
+  {name:'',displayName:'',meta:'',flag:'',color:PLAYER_COLORS[1]}
+];
+let acTimers={},acControllers={};
+
+function renderPlayers(){
+  const grid=document.getElementById('players-grid');
+  const phMap={fr:'Joueur',en:'Player',es:'Jugador',de:'Spieler',it:'Giocatore'};
+  grid.innerHTML=players.map((p,i)=>`
+    <div class="player-slot" id="pslot-${i}">
+      <div class="player-color-dot" style="background:${p.color};margin-top:${p.displayName?'8px':'10px'}"></div>
+      <div class="player-input-wrap">
+        <input class="player-input" id="pinput-${i}"
+          placeholder="${phMap[lang]||'Player'} ${i+1}…"
+          value="${p.displayName||p.name}"
+          autocomplete="off"
+          oninput="onPlayerInput(${i},this.value)"
+          onkeydown="onPlayerKey(event,${i})"
+          onfocus="openDropdown(${i})"
+          style="border-left:2px solid ${p.color}"/>
+        <div class="autocomplete-dropdown" id="acdrop-${i}"></div>
+        ${p.displayName?`
+        <div class="player-selected-badge" style="display:flex">
+          <span class="flag">${p.flag}</span>
+          <div class="info">
+            <span class="pname">${p.displayName}</span>
+            <span class="pmeta">${p.meta}</span>
+          </div>
+          <button class="clear-player" onclick="clearPlayer(${i})">✕</button>
+        </div>`:''}
+      </div>
+      ${players.length>2?`<button class="remove-player" onclick="removePlayer(${i})">✕</button>`:''}
+    </div>`).join('');
+  document.getElementById('add-player-btn').style.display=players.length>=7?'none':'flex';
+}
+
+function onPlayerInput(i,val){
+  players[i].displayName='';players[i].name=val;
+  clearTimeout(acTimers[i]);
+  if(val.length<2){closeDropdown(i);return}
+  acTimers[i]=setTimeout(()=>searchPlayer(i,val),320);
+}
+
+async function searchPlayer(i,query){
+  const drop=document.getElementById(`acdrop-${i}`);
+  if(!drop)return;
+  drop.innerHTML=`<div class="ac-loading"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+  drop.classList.add('open');
+  if(acControllers[i])acControllers[i].abort();
+  acControllers[i]=new AbortController();
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      signal:acControllers[i].signal,
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:600,
+        system:`You are the Transfermarkt player database. When given a search query, return matching football players.
+CRITICAL: Reply with ONLY a raw JSON array. Zero markdown. Zero explanation. Zero backticks. Start your response with [ and end with ].
+Each object must have exactly these fields:
+- name: string (full name as on Transfermarkt)
+- age: number (current age in years, integer)
+- flag: string (nationality emoji flag)
+- nationality: string (country name)  
+- position: string (short: GK / CB / LB / RB / CDM / CM / CAM / LW / RW / CF / ST)
+- club: string (current club, or "Retraité" if retired)
+- active: boolean
+- marketValue: string (e.g. "€85M" or "Retraité")
+Return up to 6 most relevant results sorted by fame. Include legends if they match.`,
+        messages:[{role:'user',content:`Transfermarkt search: "${query}"`}]
+      })
+    });
+    const data=await res.json();
+    const raw=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').trim();
+    // robust JSON extraction
+    const match=raw.match(/\[[\s\S]*\]/);
+    if(!match)throw new Error('no json');
+    const arr=JSON.parse(match[0]);
+    if(!Array.isArray(arr)||!arr.length)throw new Error('empty');
+    renderDropdown(i,arr);
+  }catch(e){
+    if(e.name!=='AbortError'){
+      const drop2=document.getElementById(`acdrop-${i}`);
+      if(drop2)drop2.innerHTML=`<div class="ac-loading" style="color:var(--text3);font-size:12px">Aucun joueur trouvé pour "${query}"</div>`;
+    }
+  }
+}
+
+function renderDropdown(i,results){
+  const drop=document.getElementById(`acdrop-${i}`);
+  if(!drop)return;
+  if(!results||!results.length){
+    drop.innerHTML=`<div class="ac-loading" style="color:var(--text3);font-size:12px">Aucun résultat</div>`;
+    return;
+  }
+  drop.innerHTML=results.map((p,ri)=>{
+    // escape for inline onclick
+    const safe=btoa(unescape(encodeURIComponent(JSON.stringify(p))));
+    const clubStr=p.active===false?'Retraité':(p.club||'');
+    const mv=p.marketValue&&p.marketValue!=='Retraité'?` · <span style="color:var(--sky);font-weight:600">${p.marketValue}</span>`:'';
+    return `<div class="ac-item" data-idx="${ri}" onclick="selectPlayer(${i},'${safe}')">
+      <span class="ac-flag">${p.flag||'🏴'}</span>
+      <div class="ac-info">
+        <div class="ac-name">${p.name} <span style="color:var(--text3);font-weight:400;font-size:12px">(${p.age} ans)</span></div>
+        <div class="ac-meta">${p.nationality||''} · ${clubStr}${mv}</div>
+      </div>
+      <span class="ac-pos">${p.position||''}</span>
+    </div>`;
+  }).join('');
+  drop.classList.add('open');
+}
+
+function selectPlayer(i,b64){
+  const p=JSON.parse(decodeURIComponent(escape(atob(b64))));
+  const clubStr=p.active===false?'Retraité':(p.club||'');
+  players[i].name=p.name;
+  players[i].displayName=`${p.name} (${p.age} ans)`;
+  players[i].flag=p.flag||'🏴';
+  players[i].meta=`${p.nationality||''} · ${p.position||''} · ${clubStr}${p.marketValue&&p.marketValue!=='Retraité'?' · '+p.marketValue:''}`;
+  closeDropdown(i);
+  renderPlayers();
+}
+function clearPlayer(i){
+  players[i].name='';players[i].displayName='';players[i].flag='';players[i].meta='';
+  renderPlayers();
+  setTimeout(()=>{const inp=document.getElementById(`pinput-${i}`);if(inp)inp.focus()},50);
+}
+function openDropdown(i){
+  const val=document.getElementById(`pinput-${i}`)?.value;
+  if(val&&val.length>=2&&!players[i].displayName)searchPlayer(i,val);
+}
+function closeDropdown(i){const drop=document.getElementById(`acdrop-${i}`);if(drop)drop.classList.remove('open')}
+function onPlayerKey(e,i){
+  const drop=document.getElementById(`acdrop-${i}`);
+  if(!drop||!drop.classList.contains('open'))return;
+  const items=drop.querySelectorAll('.ac-item');
+  const focused=drop.querySelector('.ac-item.focused');
+  let idx=focused?parseInt(focused.getAttribute('data-idx')):-1;
+  if(e.key==='ArrowDown'){e.preventDefault();idx=Math.min(idx+1,items.length-1)}
+  else if(e.key==='ArrowUp'){e.preventDefault();idx=Math.max(idx-1,0)}
+  else if(e.key==='Enter'&&focused){e.preventDefault();focused.click();return}
+  else if(e.key==='Escape'){closeDropdown(i);return}
+  items.forEach((it,n)=>it.classList.toggle('focused',n===idx));
+}
+document.addEventListener('click',e=>{
+  players.forEach((_,i)=>{const slot=document.getElementById(`pslot-${i}`);if(slot&&!slot.contains(e.target))closeDropdown(i)});
+});
+function addPlayerSlot(){
+  if(players.length>=7)return;
+  players.push({name:'',displayName:'',meta:'',flag:'',color:PLAYER_COLORS[players.length%PLAYER_COLORS.length]});
+  renderPlayers();
+}
+function removePlayer(i){
+  if(players.length<=2)return;
+  players.splice(i,1);
+  renderPlayers();
+}
+
+/* ════════════════════════════════════════
+   METRICS
+════════════════════════════════════════ */
+let selectedMetrics=new Set(['Buts','Passes D.','xG','xA','Dribbles']);
+let customMetrics=[];
+
+function renderMetricChips(){
+  const defaults=T[lang].metricsDefault;
+  const all=[...defaults,...customMetrics];
+  const chips=document.getElementById('metrics-chips');
+  chips.innerHTML=all.map(m=>`<span class="metric-chip ${selectedMetrics.has(m)?'on':''}" onclick="toggleMetric(this,'${m}')">${m}</span>`).join('');
+}
+
+function toggleMetric(el,m){
+  if(selectedMetrics.has(m)){if(selectedMetrics.size>2)selectedMetrics.delete(m)}
+  else selectedMetrics.add(m);
+  el.classList.toggle('on',selectedMetrics.has(m));
+}
+
+function addCustomMetric(e){
+  if(e.key!=='Enter')return;
+  const inp=document.getElementById('custom-metric');
+  const val=inp.value.trim();
+  if(!val)return;
+  customMetrics.push(val);selectedMetrics.add(val);
+  inp.value='';renderMetricChips();
+}
+
+async function autoSuggestMetrics(){
+  const names=players.map(p=>p.name).filter(Boolean);
+  if(!names.length){showToast('Ajoutez au moins un joueur');return}
+  const btn=document.getElementById('auto-btn');
+  btn.textContent='⏳ …';btn.disabled=true;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,
+        messages:[{role:'user',content:`Players: ${names.join(', ')}. Suggest 6 most relevant football stats metrics to compare them. Reply ONLY as JSON array of short strings, no markdown, no explanation. Example: ["Goals","xG","Assists","Progressive Passes","Dribbles","xA"]`}]})
+    });
+    const data=await res.json();
+    const raw=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const clean=raw.replace(/```[a-z]*\n?/g,'').replace(/```/g,'').trim();
+    const arr=JSON.parse(clean);
+    selectedMetrics=new Set(arr);
+    renderMetricChips();
+    showToast('✅ Métriques suggérées par l\'IA');
+  }catch{showToast('Erreur suggestion')}
+  btn.textContent=T[lang].autoBtn;btn.disabled=false;
+}
+
+/* ════════════════════════════════════════
+   CHART TYPE
+════════════════════════════════════════ */
+let chartType='radar';
+
+function selectChartType(btn){
+  document.querySelectorAll('.chart-type-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  chartType=btn.getAttribute('data-type');
+  const sa=document.getElementById('scatter-axes');
+  sa.style.display=chartType==='scatter'?'flex':'none';
+}
+
+/* ════════════════════════════════════════
+   GENERATE CHART
+════════════════════════════════════════ */
+let currentChart=null;
+
+function getChartColors(){
+  return dark
+    ?{grid:'rgba(90,160,240,0.1)',text:'rgba(200,220,255,0.7)'}
+    :{grid:'rgba(30,80,180,0.1)',text:'rgba(13,31,60,0.7)'};
+}
+
+function showChartState(state){
+  // state: 'placeholder' | 'loading' | 'chart' | 'error'
+  document.getElementById('chart-placeholder').style.display   = state==='placeholder'?'flex':'none';
+  document.getElementById('chart-loading-wrap').style.display  = state==='loading'   ?'flex':'none';
+  document.getElementById('chart-canvas-wrap').style.display   = state==='chart'     ?'block':'none';
+  if(state==='error'){
+    document.getElementById('chart-placeholder').style.display='flex';
+    document.getElementById('chart-placeholder').querySelector('p').textContent='Erreur — Réessayez.';
+  }
+}
+
+async function generateChart(){
+  const names=players.map(p=>p.name).filter(Boolean);
+  if(!names.length){showToast('Ajoutez au moins un joueur');return}
+  const metrics=[...selectedMetrics];
+  if(!metrics.length){showToast('Choisissez au moins 2 métriques');return}
+
+  const btn=document.getElementById('gen-btn');
+  btn.disabled=true;
+  showChartState('loading');
+  document.getElementById('chart-legend').innerHTML='';
+  document.getElementById('insight-box').style.display='none';
+
+  const periodStr=getSeasonString();
+  const comp=document.getElementById('comp-select').value;
+  const compStr=comp==='all'?'all competitions':comp.toUpperCase();
+
+  let prompt='';
+  if(chartType==='scatter'){
+    const xv=document.getElementById('scatter-x').value;
+    const yv=document.getElementById('scatter-y').value;
+    prompt=`Stats ${xv} and ${yv} for: ${names.join(', ')}. Period: ${periodStr}. Competition: ${compStr}. JSON only: {"players":[{"name":"...","x":12.3,"y":8},...]}. Realistic values.`;
+  } else if(chartType==='line'){
+    const seasons=selectedSeasons.length>=2?[...selectedSeasons].sort():['2019-20','2020-21','2021-22','2022-23','2023-24'];
+    const metric=metrics[0];
+    prompt=`${metric} per season (${seasons.join(', ')}) for: ${names.join(', ')}. Competition: ${compStr}. JSON only: {"seasons":[...],"players":[{"name":"...","values":[...]},...]}. Realistic values.`;
+  } else {
+    prompt=`Stats: ${metrics.join(', ')} for players: ${names.join(', ')}. Period: ${periodStr}. Competition: ${compStr}. JSON only: {"metrics":[...],"players":[{"name":"...","values":[...]},...]}. ${chartType==='radar'?'Normalize 0-100.':''} Realistic values.`;
+  }
+
+  try{
+    const res=await fetch('/api/chat',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({max_tokens:800,system:'You are a football statistics database. Reply ONLY with valid JSON array/object. No markdown, no explanation, no backticks.',messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    const raw=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const match=raw.match(/\{[\s\S]*\}/);
+    if(!match)throw new Error('no json');
+    const parsed=JSON.parse(match[0]);
+    drawChart(parsed,chartType,metrics);
+    showChartState('chart');
+    await generateInsight(names,metrics,periodStr,compStr,chartType);
+  }catch(e){
+    console.error(e);
+    showChartState('error');
+  }
+  btn.disabled=false;
+}
+
+function drawChart(data,type,metrics){
+  // destroy previous chart properly
+  if(currentChart){
+    currentChart.destroy();
+    currentChart=null;
+  }
+  // get the canvas — it stays in the DOM, we never recreate it
+  const canvas=document.getElementById('main-chart');
+  // reset canvas size to force clean redraw
+  canvas.width=canvas.offsetWidth;
+  canvas.height=canvas.offsetHeight;
+  const ctx=canvas.getContext('2d');
+  const clr=getChartColors();
+
+  const tooltip={callbacks:{label:c=>`${c.dataset.label}: ${c.raw}`}};
+  const noLegend={legend:{display:false}};
+
+  if(type==='radar'){
+    const labels=data.metrics||metrics;
+    const datasets=(data.players||[]).map((p,i)=>({
+      label:p.name,data:p.values,
+      borderColor:PLAYER_COLORS[i%PLAYER_COLORS.length],
+      backgroundColor:PLAYER_COLORS[i%PLAYER_COLORS.length]+'22',
+      borderWidth:2,pointRadius:4,pointHoverRadius:6,
+      pointBackgroundColor:PLAYER_COLORS[i%PLAYER_COLORS.length]
+    }));
+    currentChart=new Chart(ctx,{type:'radar',data:{labels,datasets},options:{
+      responsive:true,maintainAspectRatio:true,
+      scales:{r:{grid:{color:clr.grid},pointLabels:{color:clr.text,font:{size:11,family:'Inter'}},ticks:{display:false},angleLines:{color:clr.grid}}},
+      plugins:{...noLegend,tooltip}
+    }});
+  } else if(type==='bar'){
+    const labels=data.metrics||metrics;
+    const datasets=(data.players||[]).map((p,i)=>({
+      label:p.name,data:p.values,
+      backgroundColor:PLAYER_COLORS[i%PLAYER_COLORS.length]+'cc',
+      borderColor:PLAYER_COLORS[i%PLAYER_COLORS.length],
+      borderWidth:1,borderRadius:5,
+    }));
+    currentChart=new Chart(ctx,{type:'bar',data:{labels,datasets},options:{
+      responsive:true,maintainAspectRatio:true,
+      scales:{
+        x:{grid:{color:clr.grid},ticks:{color:clr.text,font:{size:11}}},
+        y:{grid:{color:clr.grid},ticks:{color:clr.text},beginAtZero:true}
+      },
+      plugins:{...noLegend,tooltip}
+    }});
+  } else if(type==='line'){
+    const labels=data.seasons||[];
+    const datasets=(data.players||[]).map((p,i)=>({
+      label:p.name,data:p.values,
+      borderColor:PLAYER_COLORS[i%PLAYER_COLORS.length],
+      backgroundColor:PLAYER_COLORS[i%PLAYER_COLORS.length]+'18',
+      borderWidth:2.5,pointRadius:5,pointHoverRadius:7,tension:.35,fill:true,
+      pointBackgroundColor:PLAYER_COLORS[i%PLAYER_COLORS.length]
+    }));
+    currentChart=new Chart(ctx,{type:'line',data:{labels,datasets},options:{
+      responsive:true,maintainAspectRatio:true,
+      scales:{
+        x:{grid:{color:clr.grid},ticks:{color:clr.text,font:{size:11}}},
+        y:{grid:{color:clr.grid},ticks:{color:clr.text},beginAtZero:true}
+      },
+      plugins:{...noLegend,tooltip}
+    }});
+  } else if(type==='scatter'){
+    const xEl=document.getElementById('scatter-x');
+    const yEl=document.getElementById('scatter-y');
+    const xLabel=xEl.options[xEl.selectedIndex].text;
+    const yLabel=yEl.options[yEl.selectedIndex].text;
+    const datasets=(data.players||[]).map((p,i)=>({
+      label:p.name,data:[{x:p.x,y:p.y}],
+      backgroundColor:PLAYER_COLORS[i%PLAYER_COLORS.length]+'cc',
+      borderColor:PLAYER_COLORS[i%PLAYER_COLORS.length],
+      borderWidth:2,pointRadius:10,pointHoverRadius:13,
+    }));
+    currentChart=new Chart(ctx,{type:'scatter',data:{datasets},options:{
+      responsive:true,maintainAspectRatio:true,
+      scales:{
+        x:{title:{display:true,text:xLabel,color:clr.text,font:{size:11}},grid:{color:clr.grid},ticks:{color:clr.text}},
+        y:{title:{display:true,text:yLabel,color:clr.text,font:{size:11}},grid:{color:clr.grid},ticks:{color:clr.text}}
+      },
+      plugins:{...noLegend,tooltip:{callbacks:{label:c=>`${c.dataset.label}: (${c.parsed.x}, ${c.parsed.y})` }}}
+    }});
+  }
+
+  // legend
+  const legendEl=document.getElementById('chart-legend');
+  if(legendEl&&data.players){
+    legendEl.innerHTML=data.players.map((p,i)=>`
+      <div class="legend-item">
+        <div class="legend-dot" style="background:${PLAYER_COLORS[i%PLAYER_COLORS.length]}"></div>
+        <span>${p.name}</span>
+      </div>`).join('');
+  }
+}
+
+function regenerateChartUI(){
+  if(!currentChart)return;
+  const clr=getChartColors();
+  if(currentChart.options.scales?.r){
+    currentChart.options.scales.r.grid.color=clr.grid;
+    currentChart.options.scales.r.pointLabels.color=clr.text;
+    currentChart.options.scales.r.angleLines.color=clr.grid;
+  }
+  ['x','y'].forEach(ax=>{
+    if(currentChart.options.scales?.[ax]){
+      currentChart.options.scales[ax].grid.color=clr.grid;
+      currentChart.options.scales[ax].ticks.color=clr.text;
+    }
+  });
+  currentChart.update();
+}
+
+async function generateInsight(names,metrics,period,comp,chartType){
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:BASE_SYSTEM+'\n\n'+T[lang].systemLang,
+        messages:[{role:'user',content:`Write a 2-3 sentence analytical insight comparing ${names.join(' vs ')} on ${metrics.slice(0,4).join(', ')} — ${period}, ${comp}. Be specific, data-driven. ${T[lang].systemLang}`}]})
+    });
+    const data=await res.json();
+    const txt=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').trim();
+    const box=document.getElementById('insight-box');
+    if(box&&txt){box.innerHTML=`<strong>💡 Analyse IA</strong><br>${txt}`;box.style.display='block'}
+  }catch{}
+}
+
+/* ── INIT ── */
+loadHist();
+renderPlayers();
+renderMetricChips();
+applyLang();
+</script>
+</body>
+</html>
