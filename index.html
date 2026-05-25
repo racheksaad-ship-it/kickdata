@@ -813,7 +813,7 @@ async function send(){
   hist.push({role:'user',content:txt});
   const {bub:aib,wrap:aiwrap}=addMsg('ai','<div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>');
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const res=await fetch('/api/chat',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:BASE_SYSTEM+'\n\n'+T[lang].systemLang,messages:hist,tools:[{type:'web_search_20250305',name:'web_search'}]})
     });
@@ -946,7 +946,7 @@ async function searchPlayer(i,query){
   if(acControllers[i])acControllers[i].abort();
   acControllers[i]=new AbortController();
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const res=await fetch('/api/chat',{
       method:'POST',headers:{'Content-Type':'application/json'},
       signal:acControllers[i].signal,
       body:JSON.stringify({
@@ -1087,7 +1087,7 @@ async function autoSuggestMetrics(){
   const btn=document.getElementById('auto-btn');
   btn.textContent='⏳ …';btn.disabled=true;
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const res=await fetch('/api/chat',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,
         messages:[{role:'user',content:`Players: ${names.join(', ')}. Suggest 6 most relevant football stats metrics to compare them. Reply ONLY as JSON array of short strings, no markdown, no explanation. Example: ["Goals","xG","Assists","Progressive Passes","Dribbles","xA"]`}]})
@@ -1302,7 +1302,7 @@ function regenerateChartUI(){
 
 async function generateInsight(names,metrics,period,comp,chartType){
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const res=await fetch('/api/chat',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:BASE_SYSTEM+'\n\n'+T[lang].systemLang,
         messages:[{role:'user',content:`Write a 2-3 sentence analytical insight comparing ${names.join(' vs ')} on ${metrics.slice(0,4).join(', ')} — ${period}, ${comp}. Be specific, data-driven. ${T[lang].systemLang}`}]})
